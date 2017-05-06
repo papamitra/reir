@@ -11,6 +11,31 @@
 // r2 -> 0x00000100 - start of ATAGS
 // preserve these registers as argument for kernel_main
 _start:
+	ldr pc,reset_handler
+	ldr pc,undefined_handler
+	ldr pc,svc_handler
+	ldr pc,prefetch_handler
+	ldr pc,data_handler
+	ldr pc,unused_handler
+	ldr pc,irq_handler
+	ldr pc,fiq_handler
+reset_handler:      .word reset
+undefined_handler:  .word halt
+svc_handler:        .word _svc_handler
+prefetch_handler:   .word halt
+data_handler:       .word halt
+unused_handler:     .word halt
+irq_handler:        .word halt
+fiq_handler:        .word halt
+
+reset:
+	mov r0,#0x8000
+	mov r1,#0x0000
+	ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
+	stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
+	ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
+	stmia r1!,{r2,r3,r4,r5,r6,r7,r8,r9}
+
 	// Setup the stack.
 	mov sp, #0x8000
  

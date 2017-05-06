@@ -1,4 +1,4 @@
-#![feature(lang_items, asm, core_intrinsics)]
+#![feature(lang_items, asm, core_intrinsics, naked_functions)]
 #![crate_type = "staticlib"]
 #![no_std]
 
@@ -127,6 +127,10 @@ pub extern fn kernel_main() {
     unsafe {uart_init();}
     unsafe {uart_puts("Hello, kernel World!\r\n");}
 
+    unsafe {asm!("svc #0x0000");}
+
+    // follow lines is not executed
+    unsafe {uart_puts("Hello, kernel World! 2\r\n");}
     loop{}
 }
 
@@ -138,3 +142,9 @@ extern fn panic_fmt() -> ! { loop {} }
 
 #[no_mangle]
 pub extern fn __aeabi_unwind_cpp_pr0 () {}
+
+#[no_mangle]
+#[naked]
+pub extern fn _svc_handler() {
+    unsafe {uart_puts("call svc handler\r\n");}
+}
