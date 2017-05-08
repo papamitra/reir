@@ -11,6 +11,9 @@ kernel.elf: ${OBJ}
 boot.o: boot.S
 	${CC} ${ASM_FLAGS} -c $< -o $@
 
+context_switch.o: context_switch.S
+	${CC} ${ASM_FLAGS} -c $< -o $@
+
 main.o : main.rs
 	rustc --target arm-unknown-linux-gnueabi --emit=obj $<
 

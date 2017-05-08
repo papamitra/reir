@@ -65,3 +65,6 @@ reset:
 halt:
 	wfe
 	b halt
+
+_svc_handler:
+        bx lr

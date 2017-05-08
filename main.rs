@@ -123,14 +123,26 @@ fn uart_puts(s: &'static str) {
 }
 
 #[no_mangle]
+pub fn usertask() {
+    uart_puts("usertask called()\r\n");
+}
+
+#[no_mangle]
 pub extern fn kernel_main() {
-    unsafe {uart_init();}
-    unsafe {uart_puts("Hello, kernel World!\r\n");}
+    uart_init();
+    uart_puts("Hello, kernel World!\r\n");
 
     unsafe {asm!("svc #0x0000");}
 
-    // follow lines is not executed
-    unsafe {uart_puts("Hello, kernel World! 2\r\n");}
+    // let mut usertask_stack: [u32; 256] = [0;256];
+    // unsafe {
+    //     let mut stack_start = &mut usertask_stack[0] as *mut u32;
+    //     stack_start = stack_start.offset(256-16);
+    //     *stack_start.offset(8) = usertask as u32;
+    // }
+
+    // Follow lines is not executed
+    uart_puts("Hello, kernel World! 2\r\n");
     loop{}
 }
 
@@ -144,7 +156,10 @@ extern fn panic_fmt() -> ! { loop {} }
 pub extern fn __aeabi_unwind_cpp_pr0 () {}
 
 #[no_mangle]
-#[naked]
-pub extern fn _svc_handler() {
-    unsafe {uart_puts("call svc handler\r\n");}
-}
+pub extern fn __aeabi_unwind_cpp_pr1 () {}
+
+// #[no_mangle]
+// pub extern fn _svc_handler() {
+//     unsafe {uart_puts("call svc handler\r\n");}
+//     unsafe {asm!("subs pc, lr, #4");}
+// }
