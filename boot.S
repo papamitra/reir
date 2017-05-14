@@ -56,7 +56,8 @@ reset:
 2:
 	cmp r4, r9
 	blo 1b
- 
+
+        
 	// Call kernel_main
 	ldr r3, =kernel_main
 	blx r3
@@ -66,5 +67,19 @@ halt:
 	wfe
 	b halt
 
+_user_stack:     .word 0x800000
+
 _svc_handler:
+        mrs r0, spsr
+        bic r0, r0, #0x1F        // clear mode field
+        orr r0, r0, #0x10        // user modecode
+        msr spsr_c, r0           // store modiried CPSR into SPSR
+        ldr lr, =task_a
+        ldr r0, =_user_stack
+        ldm r0, {sp}^
+        nop
+        movs pc, lr
+
+.global _to_user_mode
+_to_user_mode:
         bx lr

@@ -127,12 +127,26 @@ pub fn usertask() {
     uart_puts("usertask called()\r\n");
 }
 
+extern {
+    fn _to_user_mode();
+}
+
+#[no_mangle]
+pub extern fn task_a() {
+    uart_puts("run task_a\r\n");
+
+    loop{}
+}
+
 #[no_mangle]
 pub extern fn kernel_main() {
     uart_init();
     uart_puts("Hello, kernel World!\r\n");
 
     unsafe {asm!("svc #0x0000");}
+
+    // to user mode
+    //unsafe { _to_user_mode(); }
 
     // let mut usertask_stack: [u32; 256] = [0;256];
     // unsafe {
