@@ -138,12 +138,21 @@ pub extern fn task_a() {
     loop{}
 }
 
+
+#[repr(C)]
+struct TSS {
+    entry: extern "C" fn()
+}
+
 #[no_mangle]
 pub extern fn kernel_main() {
     uart_init();
     uart_puts("Hello, kernel World!\r\n");
 
-    unsafe {asm!("svc #0x0000");}
+    let tss = TSS{entry: task_a};
+
+    unsafe {asm!("mov r12, $0; svc #0x0000"
+                 : "=r"(&tss) :: "r12");}
 
     // to user mode
     //unsafe { _to_user_mode(); }
