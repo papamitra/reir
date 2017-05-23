@@ -5,6 +5,8 @@
 use core::intrinsics::volatile_store;
 use core::intrinsics::volatile_load;
 
+mod timer;
+
 // Memory-Mapped I/O output
 fn mmio_write(reg: u32, data: u32) {
     unsafe {volatile_store(reg as *mut u32,data)};
@@ -129,6 +131,7 @@ pub fn usertask() {
 
 extern {
     fn _to_user_mode();
+    fn enable_IRQ();
 }
 
 #[no_mangle]
@@ -166,6 +169,32 @@ pub extern fn kernel_main() {
 
     // Follow lines is not executed
     uart_puts("Hello, kernel World! 2\r\n");
+
+    unsafe {
+        volatile_store(IRQ_DISABLE_BASIC as *mut u32, 0xffffffff);
+        volatile_store(IRQ_DISABLE_IRQS1 as *mut u32, 0xffffffff);
+        volatile_store(IRQ_DISABLE_IRQS2 as *mut u32, 0xffffffff);
+        volatile_store(IRQ_FIQ_CONTROL as *mut u32, 0);
+
+        volatile_store(IRQ_ENABLE_BASIC as *mut u32, 0x01);
+
+        volatile_store(ARM_TIMER_CTL as *mut u32,
+                       volatile_load(ARM_TIMER_CTL as *mut u32) & 0xffffff00);
+
+        volatile_store(ARM_TIMER_DIV as *mut u32, 0x000000F9);
+
+        volatile_store(ARM_TIMER_LOD as *mut u32, 4000000-1);
+        volatile_store(ARM_TIMER_RLD as *mut u32, 4000000-1);
+
+        volatile_store(ARM_TIMER_CLI as *mut u32, 0);
+        volatile_store(ARM_TIMER_CTL as *mut u32,
+                       volatile_load(ARM_TIMER_CTL as *mut u32) | 0xA2);
+
+        volatile_store(IRQ_ENABLE_BASIC as *mut u32, 0x01);
+
+        enable_IRQ();
+
+    }
     loop{}
 }
 

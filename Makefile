@@ -14,7 +14,7 @@ boot.o: boot.S
 context_switch.o: context_switch.S
 	${CC} ${ASM_FLAGS} -c $< -o $@
 
-main.o : main.rs
+main.o : main.rs timer.rs
 	rustc --target arm-unknown-linux-gnueabi --emit=obj $<
 
 clean: 
